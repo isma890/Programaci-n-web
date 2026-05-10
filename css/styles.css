@@ -1,0 +1,90 @@
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: #f5f6fa;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background: #2f3640;
+    color: white;
+}
+
+.app {
+    display: flex;
+}
+
+.sidebar {
+    width: 220px;
+    background: #353b48;
+    color: white;
+    min-height: 100vh;
+    padding: 15px;
+}
+
+.menu-item {
+    margin: 10px 0;
+    cursor: pointer;
+}
+
+.main {
+    flex: 1;
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+}
+
+.slider-card {
+    position: relative;
+}
+
+.slider-img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
+
+.nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    font-size: 20px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.left { left: 10px; }
+.right { right: 10px; }
+
+.overlay {
+    position: absolute;
+    bottom: 10px;
+    left: 20px;
+    color: white;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.img-card img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+}
+
+button {
+    cursor: pointer;
+}

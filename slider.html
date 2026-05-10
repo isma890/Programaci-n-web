@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Slider App</title>
+
+<link rel="stylesheet" href="css/styles.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="logo">📘 Slider</div>
+</header>
+
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="menu-title">NAVEGACIÓN</div>
+        <div class="menu-item active">🏠 Inicio</div>
+
+        <div class="menu-title">PRÁCTICAS</div>
+        <div class="menu-item active">🪅 Slider</div>
+
+    
+    </aside>
+
+    <main class="main">
+
+        <div class="page-header">
+            <h2>🪅 Carrusel de Imágenes</h2>
+            <p>Slider dinámico con AJAX</p>
+        </div>
+
+        <!-- SLIDER -->
+        <div class="card slider-card">
+
+            <button class="nav left" onclick="prevImage()">❮</button>
+
+            <img src="https://picsum.photos/1200/400" class="slider-img" id="slider">
+
+            <div class="overlay">
+                <h3 id="titulo">Sin imágenes</h3>
+            </div>
+
+            <button class="nav right" onclick="nextImage()">❯</button>
+
+        </div>
+
+        <!-- SUBIR -->
+        <div class="card upload-card">
+
+            <input type="file" id="fileInput">
+            <input type="text" id="nombre" placeholder="Nombre de la imagen">
+
+            <button onclick="subirImagen()">Subir Imagen</button>
+
+        </div>
+
+        <!-- GALERIA -->
+        <div class="card gallery">
+
+            <h3>Imágenes</h3>
+            <button onclick="cargarImagenes()">Actualizar</button>
+
+            <div class="grid" id="galeria"></div>
+
+        </div>
+
+    </main>
+
+</div>
+
+<script>
+
+// 🔥 VARIABLES
+let imagenes = [];
+let index = 0;
+
+// 🔥 SLIDER
+function nextImage(){
+    if(imagenes.length === 0) return;
+
+    index = (index + 1) % imagenes.length;
+    actualizarSlider();
+}
+
+function prevImage(){
+    if(imagenes.length === 0) return;
+
+    index = (index - 1 + imagenes.length) % imagenes.length;
+    actualizarSlider();
+}
+
+function actualizarSlider(){
+    document.getElementById("slider").src = imagenes[index].ruta;
+    document.getElementById("titulo").innerText = imagenes[index].nombre;
+}
+
+// 🔥 SUBIR IMAGEN
+function subirImagen(){
+
+    let file = document.getElementById("fileInput").files[0];
+    let nombre = document.getElementById("nombre").value;
+
+    if(!file || !nombre){
+        alert("Selecciona imagen y nombre");
+        return;
+    }
+
+    let formData = new FormData();
+    formData.append("imagen", file);
+    formData.append("nombre", nombre);
+
+    fetch("subir.php", {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.mensaje);
+        cargarImagenes();
+    })
+    .catch(err => console.log(err));
+}
+
+// 🔥 CARGAR IMÁGENES
+function cargarImagenes(){
+
+    fetch("obtener.php")
+    .then(res => res.json())
+    .then(data => {
+
+        imagenes = data;
+        index = 0;
+
+        let galeria = document.getElementById("galeria");
+        galeria.innerHTML = "";
+
+        data.forEach(img => {
+
+            galeria.innerHTML += `
+                <div class="img-card">
+                    <img src="${img.ruta}">
+                    <h4>${img.nombre}</h4>
+
+                    <button onclick="ver(${img.id})">Ver</button>
+                    <button onclick="eliminar(${img.id})">Eliminar</button>
+                </div>
+            `;
+        });
+
+        if(data.length > 0){
+            actualizarSlider();
+        } else {
+            document.getElementById("slider").src = "";
+            document.getElementById("titulo").innerText = "Sin imágenes";
+        }
+
+    });
+}
+
+// 🔥 VER IMAGEN
+function ver(id){
+    index = imagenes.findIndex(img => img.id == id);
+    actualizarSlider();
+}
+
+// 🔥 ELIMINAR
+function eliminar(id){
+
+    fetch("eliminar.php", {
+        method: "POST",
+        headers: {"Content-Type":"application/x-www-form-urlencoded"},
+        body: "id=" + id
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.mensaje);
+        cargarImagenes();
+    });
+}
+
+// 🔥 INICIO
+cargarImagenes();
+
+</script>
+
+</body>
+</html>
