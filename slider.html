@@ -77,115 +77,200 @@
 
 <script>
 
-// 🔥 VARIABLES
-let imagenes = [];
-let index = 0;
+let actualId = 0;
 
-// 🔥 SLIDER
-function nextImage(){
-    if(imagenes.length === 0) return;
 
-    index = (index + 1) % imagenes.length;
-    actualizarSlider();
+// 🔥 MOSTRAR IMAGEN
+function mostrarImagen(img){
+
+    actualId = img.id;
+
+    document.getElementById("slider").src =
+        img.ruta + "?t=" + new Date().getTime();
+
+    document.getElementById("titulo").innerText =
+        img.nombre;
+
+    document.getElementById("galeria").innerHTML = `
+
+        <div class="img-card">
+
+            <img src="${img.ruta}?t=${new Date().getTime()}">
+
+            <h4>${img.nombre}</h4>
+
+            <button onclick="ver(${img.id})">
+                Ver
+            </button>
+
+            <button onclick="eliminar(${img.id})">
+                Eliminar
+            </button>
+
+        </div>
+
+    `;
 }
 
-function prevImage(){
-    if(imagenes.length === 0) return;
 
-    index = (index - 1 + imagenes.length) % imagenes.length;
-    actualizarSlider();
-}
-
-function actualizarSlider(){
-    document.getElementById("slider").src = imagenes[index].ruta;
-    document.getElementById("titulo").innerText = imagenes[index].nombre;
-}
-
-// 🔥 SUBIR IMAGEN
-function subirImagen(){
-
-    let file = document.getElementById("fileInput").files[0];
-    let nombre = document.getElementById("nombre").value;
-
-    if(!file || !nombre){
-        alert("Selecciona imagen y nombre");
-        return;
-    }
-
-    let formData = new FormData();
-    formData.append("imagen", file);
-    formData.append("nombre", nombre);
-
-    fetch("subir.php", {
-        method: "POST",
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        alert(data.mensaje);
-        cargarImagenes();
-    })
-    .catch(err => console.log(err));
-}
-
-// 🔥 CARGAR IMÁGENES
+// 🔥 CARGAR PRIMERA
 function cargarImagenes(){
 
-    fetch("obtener.php")
+    fetch("obtener.php?direccion=primera")
+
     .then(res => res.json())
+
     .then(data => {
 
-        imagenes = data;
-        index = 0;
-
-        let galeria = document.getElementById("galeria");
-        galeria.innerHTML = "";
-
-        data.forEach(img => {
-
-            galeria.innerHTML += `
-                <div class="img-card">
-                    <img src="${img.ruta}">
-                    <h4>${img.nombre}</h4>
-
-                    <button onclick="ver(${img.id})">Ver</button>
-                    <button onclick="eliminar(${img.id})">Eliminar</button>
-                </div>
-            `;
-        });
-
         if(data.length > 0){
-            actualizarSlider();
-        } else {
-            document.getElementById("slider").src = "";
-            document.getElementById("titulo").innerText = "Sin imágenes";
+
+            mostrarImagen(data[0]);
+
         }
 
     });
+
 }
 
-// 🔥 VER IMAGEN
-function ver(id){
-    index = imagenes.findIndex(img => img.id == id);
-    actualizarSlider();
+
+// 🔥 SIGUIENTE
+function nextImage(){
+
+    fetch(`obtener.php?actual=${actualId}&direccion=siguiente`)
+
+    .then(res => res.json())
+
+    .then(data => {
+
+        if(data.length > 0){
+
+            mostrarImagen(data[0]);
+
+        }
+
+    })
+
+    .catch(error => console.log(error));
+
 }
+
+
+// 🔥 ANTERIOR
+function prevImage(){
+
+    fetch(`obtener.php?actual=${actualId}&direccion=anterior`)
+
+    .then(res => res.json())
+
+    .then(data => {
+
+        if(data.length > 0){
+
+            mostrarImagen(data[0]);
+
+        }
+
+    })
+
+    .catch(error => console.log(error));
+
+}
+
+
+// 🔥 VER
+function ver(id){
+
+    fetch(`obtener.php?actual=${id}&direccion=ver`)
+
+    .then(res => res.json())
+
+    .then(data => {
+
+        if(data.length > 0){
+
+            mostrarImagen(data[0]);
+
+        }
+
+    });
+
+}
+
 
 // 🔥 ELIMINAR
 function eliminar(id){
 
     fetch("eliminar.php", {
+
         method: "POST",
-        headers: {"Content-Type":"application/x-www-form-urlencoded"},
+
+        headers: {
+            "Content-Type":
+            "application/x-www-form-urlencoded"
+        },
+
         body: "id=" + id
+
     })
+
     .then(res => res.json())
+
     .then(data => {
+
         alert(data.mensaje);
+
         cargarImagenes();
+
     });
+
 }
 
-// 🔥 INICIO
+
+// 🔥 SUBIR
+function subirImagen(){
+
+    let file =
+        document.getElementById("fileInput").files[0];
+
+    let nombre =
+        document.getElementById("nombre").value;
+
+    if(!file || !nombre){
+
+        alert("Selecciona imagen y nombre");
+
+        return;
+
+    }
+
+    let formData = new FormData();
+
+    formData.append("imagen", file);
+
+    formData.append("nombre", nombre);
+
+    fetch("subir.php", {
+
+        method: "POST",
+
+        body: formData
+
+    })
+
+    .then(res => res.json())
+
+    .then(data => {
+
+        alert(data.mensaje);
+
+        cargarImagenes();
+
+    });
+
+}
+
+
+// 🔥 INICIAR
 cargarImagenes();
 
 </script>
